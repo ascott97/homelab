@@ -1,0 +1,6 @@
+---
+- name: Install k3s Server
+  hosts: debian
+  become: true
+  roles:
+    - role: k3s.orchestration.k3s_server
