@@ -8,6 +8,8 @@ There is a one time action to retrieve the auto generated argocd admin password 
 2. Update the password via the UI - `kubectl -n argocd port-forward svc/argo-cd-argocd-server -n argocd 8080:80`
 3. Delete the password secret `kubectl -n argocd delete secret argocd-initial-admin-secret`
 
+This will setup an initial argocd app to manage other apps, using the [app of apps pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern) this app will use this repo path `https://github.com/ascott97/homelab/argocd/apps`
+
 ## Setup
 
 Create python virtual environment:
