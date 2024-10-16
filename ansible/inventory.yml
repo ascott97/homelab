@@ -2,7 +2,7 @@ k3s_cluster:
   children:
     server:
       hosts:
-        debian:
+        debian01:
 
   vars:
     ansible_port: 22

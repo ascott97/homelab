@@ -1,6 +1,10 @@
 ---
 - name: Install k3s Server
-  hosts: debian
+  hosts: debian01
   become: true
+  vars:
+    extra_manifests:
+      - files/argo-cd.yaml
   roles:
+    - role: k3s.orchestration.prereq
     - role: k3s.orchestration.k3s_server
