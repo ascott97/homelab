@@ -4,27 +4,31 @@ Bootstrap a k3s cluster with argocd, which is used to deploy all other apps.
 
 There is a one time action to retrieve the auto generated argocd admin password to log in & then delete this secret once the admin password has been updated.
 
-1. Get the password `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d`
-2. Update the password via the UI - `kubectl -n argocd port-forward svc/argo-cd-argocd-server -n argocd 8080:80`
-3. Delete the password secret `kubectl -n argocd delete secret argocd-initial-admin-secret`
+1. Get the password  
+  `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d`
+2. Update the password via the UI  
+  `kubectl -n argocd port-forward svc/argo-cd-argocd-server -n argocd 8080:80`
+3. Delete the password secret  
+  `kubectl -n argocd delete secret argocd-initial-admin-secret`
 
-This will setup an initial argocd app to manage other apps, using the [app of apps pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern) this app will use this repo path `https://github.com/ascott97/homelab/argocd/apps`
+This will setup an initial argocd app to manage other apps, using the [app of apps pattern.](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern)  
+It will use the `argocd/apps` directory in this repository.
 
 ## Setup
 
-Create python virtual environment:
+Create python virtual environment:  
 
-    `python3 -m venv venv`
+`python3 -m venv venv`
 
-Activate virtual environment:
+Activate virtual environment:  
 
-    `source venv/bin/activate`
+`source venv/bin/activate`
 
-Install dependencies:
+Install dependencies:  
 
-    `pip install -r requirements.txt`
+`pip install -r requirements.txt`
 
-To apply all:
+To apply all:  
 
-    `ansible-playbook playbooks/site.yml --ask-vault-pass`
+  `ansible-playbook playbooks/site.yml --ask-vault-pass`
 
