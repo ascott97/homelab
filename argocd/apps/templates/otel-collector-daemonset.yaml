@@ -22,7 +22,7 @@ spec:
     - RespectIgnoreDifferences=true
     - ApplyOutOfSyncOnly=true
   source:
-    chart: open-telemetry
+    chart: opentelemetry-collector
     repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
     targetRevision: 0.108.0
     helm:
