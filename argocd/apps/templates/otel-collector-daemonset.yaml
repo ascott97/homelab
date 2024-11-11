@@ -1,0 +1,114 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: otel-collector-daemonset
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: observability
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+    - CreateNamespace=true
+    - PrunePropagationPolicy=foreground
+    - PruneLast=true
+    - RespectIgnoreDifferences=true
+    - ApplyOutOfSyncOnly=true
+  source:
+    chart: open-telemetry
+    repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
+    targetRevision: 1.15.0
+    helm:
+      releaseName: otel-collector-daemonset
+      valuesObject:
+        mode: daemonset
+        image:
+          repository: otel/opentelemetry-collector-k8s
+        extraEnvs:
+          - name: GRAFANA_CLOUD_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: grafana-cloud-api-key
+                key: apiKey
+        presets:
+          logsCollection:
+            enabled: true
+          kubernetesAttributes:
+            enabled: true
+          hostMetrics:
+            enabled: true
+          kubeletMetrics:
+            enabled: true
+        config:
+          extensions:
+            basicauth:
+              client_auth: 
+                username: "815890"
+                password: ${env:GRAFANA_CLOUD_API_KEY}
+          receivers:
+            prometheus:
+              config:
+                scrape_configs:
+                  - job_name: opentelemetry-collector
+                    scrape_interval: 60s
+                    static_configs:
+                      - targets:
+                          - ${env:MY_POD_IP}:8888
+            hostmetrics:
+                collection_interval: 60s
+            kubeletstats:
+                collection_interval: 60s
+          processors:
+            k8sattributes:
+              extract:
+                labels:
+                  - tag_name: service.name
+                    key: k8s-apps
+                    from: pod
+                  - tag_name: service.name
+                    key: app.kubernetes.io/name
+                    from: pod
+                  - tag_name: service.version
+                    key: app.kubernetes.io/version
+                    from: pod
+            transform/prometheus_labels:
+              error_mode: ignore
+              metric_statements:
+                - context: datapoint
+                  statements:
+                    - set(attributes["service.name"], resource.attributes["service.name"])
+                    - set(attributes["service.version"], resource.attributes["service.version"])
+                    - set(attributes["k8s.container.name"], resource.attributes["k8s.container.name"])
+                    - set(attributes["k8s.namespace.name"], resource.attributes["k8s.namespace.name"])
+                    - set(attributes["k8s.pod.name"], resource.attributes["k8s.pod.name"])
+                    - set(attributes["k8s.deployment.name"], resource.attributes["k8s.deployment.name"])
+                    - set(attributes["k8s.node.name"], "${env:K8S_NODE_NAME}")
+          exporters:
+            otlphttp:
+              endpoint: https://otlp-gateway-prod-eu-west-2.grafana.net/otlp
+              auth:
+                authenticator: basicauth
+          service:
+            extensions:
+             - basicauth
+             - health_check
+            pipelines:
+              logs:
+                exporters:
+                  - otlphttp
+              metrics:
+                processors:
+                  - k8sattributes
+                  - memory_limiter
+                  - batch
+                  - transform/prometheus_labels
+                exporters:
+                  - otlphttp
+
