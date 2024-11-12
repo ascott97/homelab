@@ -64,7 +64,7 @@ spec:
               extract:
                 labels:
                   - tag_name: service.name
-                    key: k8s-apps
+                    key: k8s-app
                     from: pod
                   - tag_name: service.name
                     key: app.kubernetes.io/name
