@@ -61,6 +61,13 @@ spec:
                     static_configs:
                       - targets:
                           - ${env:MY_POD_IP}:8888
+                  - job_name: k8s
+                    kubernetes_sd_configs:
+                      - role: pod
+                    relabel_configs:
+                      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                        regex: "true"
+                        action: keep
             hostmetrics:
                 collection_interval: 60s
             kubeletstats:
@@ -105,9 +112,8 @@ spec:
                   - otlphttp
               metrics:
                 processors:
-                  - k8sattributes
-                  - memory_limiter
                   - batch
+                  - k8sattributes
                   - transform/prometheus_labels
                 exporters:
                   - otlphttp

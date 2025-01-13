@@ -7,3 +7,6 @@ Argocd is setup using the [app of apps pattern.](https://argo-cd.readthedocs.io/
 New apps can be added to the `apps/templates` directory.
 
 ## Currently Deployed
+
+* OpenTelemetry Collector
+* External DNS Provider
